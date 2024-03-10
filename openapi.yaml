@@ -1,0 +1,157 @@
+openapi: 3.0.0
+info:
+  title: BuyLists API
+  version: 1.0.0
+  description: API for managing buy lists and their items.
+servers:
+  - url: https://buylist-api.vercel.app
+    description: Main API server
+paths:
+  /buyLists:
+    get:
+      operationId: getBuyLists
+      summary: Retrieves a list of buy lists.
+      responses:
+        '200':
+          description: An array of buy lists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuyLists'
+  /buyLists/{name}:
+    get:
+      operationId: getBuyList
+      summary: Retrieves a buy list.
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A buy list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuyList'
+        '404':
+          description: Buy list not found.
+    post:
+      operationId: createBuyList
+      summary: Creates a new buy list.
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created buy list.
+        '409':
+          description: Buy list already exists.
+    delete:
+      operationId: deleteBuyList
+      summary: Deletes a buy list.
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Buy list deleted.
+        '404':
+          description: Buy list not found.
+  /buyLists/{name}/items/{itemName}:
+    post:
+      operationId: addItemToBuyList
+      summary: Adds an item to a buy list.
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: itemName
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - quantity
+              properties:
+                quantity:
+                  type: integer
+      responses:
+        '200':
+          description: Item added to the buy list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+    delete:
+      operationId: removeItemFromBuyList
+      summary: Removes an item from a buy list.
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: itemName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Item removed.
+    patch:
+      operationId: markItemAsBought
+      summary: Marks an item as bought in a buy list.
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: itemName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Item marked as bought.
+
+components:
+  schemas:
+    BuyLists:
+      type: array
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+    BuyList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Item'
+    Item:
+      type: object
+      properties:
+        itemName:
+          type: string
+        quantity:
+          type: integer
+        bought:
+          type: boolean
