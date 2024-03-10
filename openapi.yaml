@@ -68,7 +68,7 @@ paths:
   /buyLists/{name}/items/{itemName}:
     post:
       operationId: addItemToBuyList
-      summary: Adds an item to a buy list.
+      summary: Adds an item to a specific buy list.
       parameters:
         - name: name
           in: path
@@ -100,7 +100,7 @@ paths:
                 $ref: '#/components/schemas/Item'
     delete:
       operationId: removeItemFromBuyList
-      summary: Removes an item from a buy list.
+      summary: Removes an item from a specific buy list.
       parameters:
         - name: name
           in: path
@@ -117,7 +117,7 @@ paths:
           description: Item removed.
     patch:
       operationId: markItemAsBought
-      summary: Marks an item as bought in a buy list.
+      summary: Marks an item as bought in a specific buy list.
       parameters:
         - name: name
           in: path
