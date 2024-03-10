@@ -34,9 +34,9 @@ app.post('/buyLists', async (req, res) => {
 });
 
 // Adds an item to a buy list
-app.post('/buyLists/:name/addItem', async (req, res) => {
-    const { name } = req.params; // This is the buyList name
-    const { itemName, quantity } = req.body;
+app.post('/buyLists/:name/items/:itemName', async (req, res) => {
+    const { name, itemName } = req.params; // Extracts name and itemName from the path
+    const { quantity } = req.body;
     try {
         const item = await sql`INSERT INTO items (itemName, quantity, bought, buyListName) VALUES (${itemName}, ${quantity}, false, ${name}) ON CONFLICT (itemName, buyListName) DO UPDATE SET quantity = items.quantity + EXCLUDED.quantity RETURNING *;`;
         res.status(200).json(item.rows[0]);
@@ -47,9 +47,8 @@ app.post('/buyLists/:name/addItem', async (req, res) => {
 });
 
 // Removes an item from a buy list
-app.post('/buyLists/:name/removeItem', async (req, res) => {
-    const { name } = req.params; // This is the buyList name
-    const { itemName } = req.body;
+app.delete('/buyLists/:name/items/:itemName', async (req, res) => {
+    const { name, itemName } = req.params; // Extracts name and itemName from the path
     try {
         await sql`DELETE FROM items WHERE buyListName = ${name} AND itemName = ${itemName};`;
         res.status(200).send('Item removed');
@@ -59,10 +58,10 @@ app.post('/buyLists/:name/removeItem', async (req, res) => {
     }
 });
 
+
 // Marks an item as bought in a buy list
-app.post('/buyLists/:name/markAsBought', async (req, res) => {
-    const { name } = req.params; // This is the buyList name
-    const { itemName } = req.body;
+app.patch('/buyLists/:name/items/:itemName', async (req, res) => {
+    const { name, itemName } = req.params; // Extracts name and itemName from the path
     try {
         await sql`UPDATE items SET bought = true WHERE buyListName = ${name} AND itemName = ${itemName};`;
         res.status(200).send('Item marked as bought');
