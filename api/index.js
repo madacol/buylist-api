@@ -48,7 +48,12 @@ app.get('/buyLists/:name', async (req, res) => {
         if (result.rows.length > 0) {
             res.status(200).json(result.rows);
         } else {
-            res.status(404).send('No items in list, or list is not found');
+            const buyListExists = await sql`SELECT * FROM buyLists WHERE name = ${name};`;
+            if (buyListExists.rows.length > 0) {
+                res.status(200).json(result.rows);
+            } else {
+                res.status(404).send('Buy list not found');
+            }
         }
     } catch (error) {
         console.error(error);
