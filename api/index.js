@@ -9,7 +9,6 @@ app.use((req, res, next) => {
     res.header(`Access-Control-Allow-Headers`, `Content-Type`);
     next();
 })
-
 // Import your custom sql function
 const { sql } = require('../db'); // Adjust the path to where your sql function is defined
 
@@ -32,7 +31,7 @@ app.post('/buyLists/:name', async (req, res) => {
         if (result.rows.length > 0) {
             res.status(201).json(result.rows[0]);
         } else {
-            res.status(409).send('Buy list already exists');
+            res.status(409).send(`Buy list "${name}" already exists`);
         }
     } catch (error) {
         console.error(error);
@@ -52,7 +51,7 @@ app.get('/buyLists/:name', async (req, res) => {
             if (buyListExists.rows.length > 0) {
                 res.status(200).json(result.rows);
             } else {
-                res.status(404).send('Buy list not found');
+                res.status(404).send(`Buy list "${name}" not found`);
             }
         }
     } catch (error) {
@@ -67,9 +66,9 @@ app.delete('/buyLists/:name', async (req, res) => {
     try {
         const result = await sql`DELETE FROM buyLists WHERE name = ${name} RETURNING *;`;
         if (result.rows.length > 0) {
-            res.status(200).send('Buy list deleted');
+            res.status(200).send(`Buy list "${name}" deleted`);
         } else {
-            res.status(404).send('Buy list not found');
+            res.status(404).send(`Buy list "${name}" not found`);
         }
     } catch (error) {
         console.error(error);
@@ -94,8 +93,14 @@ app.post('/buyLists/:name/items/:itemName', async (req, res) => {
 app.delete('/buyLists/:name/items/:itemName', async (req, res) => {
     const { name, itemName } = lowerCaseParams(req.params); // Extracts name and itemName from the path
     try {
-        await sql`DELETE FROM items WHERE buyListName = ${name} AND itemName = ${itemName};`;
-        res.status(200).send('Item removed');
+        const result = await sql`DELETE FROM items WHERE buyListName = ${name} AND itemName = ${itemName};`;
+        if (result.rowCount === 0) {
+            // No rows deleted, item not found
+            res.status(404).send(`Item "${itemName}" not found in buy list "${name}"`);
+        } else {
+            // Item deleted successfully
+            res.status(200).send(`Item "${itemName}" deleted from buy list "${name}"`);
+        }
     } catch (error) {
         console.error(error);
         res.status(500).send(error.message);
@@ -107,8 +112,14 @@ app.delete('/buyLists/:name/items/:itemName', async (req, res) => {
 app.patch('/buyLists/:name/items/:itemName', async (req, res) => {
     const { name, itemName } = lowerCaseParams(req.params); // Extracts name and itemName from the path
     try {
-        await sql`UPDATE items SET bought = true WHERE buyListName = ${name} AND itemName = ${itemName};`;
-        res.status(200).send('Item marked as bought');
+        const result = await sql`UPDATE items SET bought = true WHERE buyListName = ${name} AND itemName = ${itemName};`;
+        if (result.rowCount === 0) {
+            // No rows updated, item not found
+            res.status(404).send(`Item "${itemName}" not found in buy list "${name}"`);
+        } else {
+            // Item marked as bought successfully
+            res.status(200).send(`Item "${itemName}" marked as bought in buy list "${name}"`);
+        }
     } catch (error) {
         console.error(error);
         res.status(500).send(error.message);
