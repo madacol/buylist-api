@@ -4,7 +4,7 @@ const app = express();
 app.use(bodyParser.json());
 
 // Import your custom sql function
-const { sql } = require('./db'); // Adjust the path to where your sql function is defined
+const { sql } = require('../db'); // Adjust the path to where your sql function is defined
 
 // Retrieves a list of buy lists
 app.get('/buyLists', async (req, res) => {
