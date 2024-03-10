@@ -26,7 +26,7 @@ app.get('/buyLists', async (req, res) => {
 
 // Creates a new buy list
 app.post('/buyLists/:name', async (req, res) => {
-    const { name } = req.params;
+    const { name } = lowerCaseParams(req.params);
     try {
         const result = await sql`INSERT INTO buyLists (name) VALUES (${name}) ON CONFLICT (name) DO NOTHING RETURNING *;`;
         if (result.rows.length > 0) {
@@ -42,7 +42,7 @@ app.post('/buyLists/:name', async (req, res) => {
 
 // Retrieves a specific buy list by name
 app.get('/buyLists/:name', async (req, res) => {
-    const { name } = req.params;
+    const { name } = lowerCaseParams(req.params);
     try {
         const result = await sql`SELECT items.* FROM buyLists JOIN items ON buyLists.name = items.buyListName WHERE buyLists.name = ${name};`;
         if (result.rows.length > 0) {
@@ -63,7 +63,7 @@ app.get('/buyLists/:name', async (req, res) => {
 
 // Deletes a specific buy list by name
 app.delete('/buyLists/:name', async (req, res) => {
-    const { name } = req.params;
+    const { name } = lowerCaseParams(req.params);
     try {
         const result = await sql`DELETE FROM buyLists WHERE name = ${name} RETURNING *;`;
         if (result.rows.length > 0) {
@@ -79,7 +79,7 @@ app.delete('/buyLists/:name', async (req, res) => {
 
 // Adds an item to a buy list
 app.post('/buyLists/:name/items/:itemName', async (req, res) => {
-    const { name, itemName } = req.params; // Extracts name and itemName from the path
+    const { name, itemName } = lowerCaseParams(req.params); // Extracts name and itemName from the path
     const { quantity } = req.body;
     try {
         const item = await sql`INSERT INTO items (itemName, quantity, bought, buyListName) VALUES (${itemName}, ${quantity}, false, ${name}) ON CONFLICT (itemName, buyListName) DO UPDATE SET quantity = items.quantity + EXCLUDED.quantity RETURNING *;`;
@@ -92,7 +92,7 @@ app.post('/buyLists/:name/items/:itemName', async (req, res) => {
 
 // Removes an item from a buy list
 app.delete('/buyLists/:name/items/:itemName', async (req, res) => {
-    const { name, itemName } = req.params; // Extracts name and itemName from the path
+    const { name, itemName } = lowerCaseParams(req.params); // Extracts name and itemName from the path
     try {
         await sql`DELETE FROM items WHERE buyListName = ${name} AND itemName = ${itemName};`;
         res.status(200).send('Item removed');
@@ -105,7 +105,7 @@ app.delete('/buyLists/:name/items/:itemName', async (req, res) => {
 
 // Marks an item as bought in a buy list
 app.patch('/buyLists/:name/items/:itemName', async (req, res) => {
-    const { name, itemName } = req.params; // Extracts name and itemName from the path
+    const { name, itemName } = lowerCaseParams(req.params); // Extracts name and itemName from the path
     try {
         await sql`UPDATE items SET bought = true WHERE buyListName = ${name} AND itemName = ${itemName};`;
         res.status(200).send('Item marked as bought');
@@ -166,5 +166,12 @@ app.get('/privacy', (req, res) => {
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
 });
+
+function lowerCaseParams(params) {
+    for (const key in params) {
+        params[key] = params[key].toLowerCase();
+    }
+    return params;
+}
 
 module.exports = app;
