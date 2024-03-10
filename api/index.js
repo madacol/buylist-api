@@ -25,8 +25,8 @@ app.get('/buyLists', async (req, res) => {
 });
 
 // Creates a new buy list
-app.post('/buyLists', async (req, res) => {
-    const { name } = req.body;
+app.post('/buyLists/:name', async (req, res) => {
+    const { name } = req.params;
     try {
         const result = await sql`INSERT INTO buyLists (name) VALUES (${name}) ON CONFLICT (name) DO NOTHING RETURNING *;`;
         if (result.rows.length > 0) {
