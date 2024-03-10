@@ -46,7 +46,7 @@ app.get('/buyLists/:name', async (req, res) => {
     try {
         const result = await sql`SELECT items.* FROM buyLists JOIN items ON buyLists.name = items.buyListName WHERE buyLists.name = ${name};`;
         if (result.rows.length > 0) {
-            res.status(200).json(result.rows[0]);
+            res.status(200).json(result.rows);
         } else {
             res.status(404).send('Buy list not found');
         }
