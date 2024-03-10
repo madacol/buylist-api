@@ -48,7 +48,7 @@ app.get('/buyLists/:name', async (req, res) => {
         if (result.rows.length > 0) {
             res.status(200).json(result.rows);
         } else {
-            res.status(404).send('Buy list not found');
+            res.status(404).send('No items in list, or list is not found');
         }
     } catch (error) {
         console.error(error);
